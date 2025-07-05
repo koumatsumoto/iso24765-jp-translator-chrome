@@ -47,3 +47,5 @@ The project is currently in early development phase with minimal implementation.
 ## Translation System Design
 
 Refer to `docs/design.md` for detailed architecture and implementation plan for the ISO 24765 terminology translation system. The system processes 4,634 English terms by converting JSON to JSONL format for efficient streaming processing.
+
+Refer to `docs/implementation-plan.md` for detailed work plan, timeline, and technical considerations for the 6-day implementation schedule.
