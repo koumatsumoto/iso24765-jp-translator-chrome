@@ -9,13 +9,16 @@ This is a TypeScript/Node.js project that automatically translates English termi
 ## Development Commands
 
 ### Build and Run
+
 - `npm run build` - Compile TypeScript to JavaScript
 - `npm start` - Run the main application (scripts/main.ts)
 
 ### Code Quality
+
 - `npm run fmt` - Format code with Prettier (printWidth: 150)
 
 ### TypeScript Configuration
+
 - Uses strict TypeScript configuration with ES2023 target
 - NodeNext module resolution
 - No emit mode (noEmit: true)
@@ -25,11 +28,13 @@ This is a TypeScript/Node.js project that automatically translates English termi
 ## Architecture
 
 ### Project Structure
+
 - `scripts/main.ts` - Main entry point (currently minimal)
 - TypeScript configuration optimized for Node.js with ES modules
 - Prettier formatting with 150 character line width
 
 ### Technical Stack
+
 - Node.js >= 24.0.0 required
 - TypeScript 5.7+ with strict configuration
 - ES modules (`"type": "module"`)
