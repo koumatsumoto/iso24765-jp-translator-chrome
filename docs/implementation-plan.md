@@ -90,24 +90,34 @@
 
 **重要**: JSONLファイルに追記する際は、以下の点に注意すること：
 
-1. **適切な追記方法**:
-   - 各行をJSONLファイルの末尾に改行で区切って追記
-   - 一時ファイルを作成し、完成後に適切な形式で書き込む
-   - Bashのcat >> またはechoコマンドを使用する場合は、EOF < /dev/null のようなマーカーが含まれないよう注意
+1. **厳禁事項**:
+   - **heredoc構文（`cat << 'EOF'`）は絶対に使用しない**
+   - heredoc使用時に `EOF < /dev/null` のような不要な文字列が混入する問題があるため
+   - 複数行の文字列を一度に追記する場合でも、heredocは使用禁止
 
-2. **避けるべき方法**:
-   - HeredocでEOFマーカーを使用する場合、`EOF < /dev/null`のような不要な文字列が混入しないよう注意
-   - 例: `cat >> file.jsonl << 'EOF'` を使用する場合は、EOFマーカーが適切に処理されることを確認
-
-3. **推奨される追記方法**:
+2. **推奨される追記方法**:
 
    ```bash
-   # 推奨方法1: printf を使用
+   # 推奨方法1: printf を使用（最も安全）
    printf '%s\n' "$json_line" >> output/iso24765-terminology-ja.jsonl
 
    # 推奨方法2: echo を使用
    echo "$json_line" >> output/iso24765-terminology-ja.jsonl
+
+   # 複数行を追記する場合はループを使用
+   for line in "${json_lines[@]}"; do
+       printf '%s\n' "$line" >> output/iso24765-terminology-ja.jsonl
+   done
    ```
+
+3. **避けるべき方法**:
+   - `cat >> file.jsonl << 'EOF'` （heredoc構文）
+   - `cat >> file.jsonl << EOF` （クォートなしheredoc）
+   - 任意の形式のheredoc構文
+
+4. **品質確保**:
+   - 追記後は必ず最後の数行を確認し、不要な文字列が混入していないことを検証
+   - `tail -n 5 output/iso24765-terminology-ja.jsonl` で確認
 
 ##### 2.3.5 データ構造
 
