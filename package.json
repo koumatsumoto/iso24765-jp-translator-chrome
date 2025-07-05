@@ -1,0 +1,23 @@
+{
+  "name": "iso24765-jp-translator",
+  "version": "1.0.0",
+  "description": "A project for automatically translating English terminology lists from ISO/IEC/IEEE 24765 (Systems and software engineering vocabulary) to Japanese using AI agents. Analyzes input English glossaries and generates appropriate Japanese translations. Translation results are quality-checked using TypeScript/Node.js-based validation tools to create consistent, high-quality Japanese terminology collections.",
+  "main": "scripts/main.ts",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "fmt": "prettier -w .",
+    "start": "node scripts/main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "prettier": {
+    "printWidth": 150
+  }
+}
