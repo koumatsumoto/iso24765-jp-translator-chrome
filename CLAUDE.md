@@ -43,3 +43,7 @@ This is a TypeScript/Node.js project that automatically translates English termi
 ## Development Notes
 
 The project is currently in early development phase with minimal implementation. The main application logic is expected to be built out in the scripts directory or migrated to a proper src structure as indicated by the TypeScript configuration.
+
+## Translation System Design
+
+Refer to `docs/design.md` for detailed architecture and implementation plan for the ISO 24765 terminology translation system. The system processes 4,634 English terms by converting JSON to JSONL format for efficient streaming processing.
