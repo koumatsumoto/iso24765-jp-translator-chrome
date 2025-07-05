@@ -10,7 +10,8 @@
   "scripts": {
     "build": "tsc",
     "fmt": "prettier -w .",
-    "start": "node scripts/main.ts"
+    "start": "node scripts/main.ts",
+    "convert-to-jsonl": "node scripts/convert-to-jsonl.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

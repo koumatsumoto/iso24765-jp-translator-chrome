@@ -12,10 +12,16 @@ This is a TypeScript/Node.js project that automatically translates English termi
 
 - `npm run build` - Compile TypeScript to JavaScript
 - `npm start` - Run the main application (scripts/main.ts)
+- `npm run convert-to-jsonl` - Convert input/iso24765-terminology.json to output/iso24765-terminology.jsonl
 
 ### Code Quality
 
 - `npm run fmt` - Format code with Prettier (printWidth: 150)
+
+### TypeScript Execution
+
+- This project uses `"type": "module"` so TypeScript files can be executed directly with Node.js
+- Use `node scripts/filename.ts` to run TypeScript files directly (no tsx required)
 
 ### TypeScript Configuration
 
