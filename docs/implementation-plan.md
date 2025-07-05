@@ -86,6 +86,29 @@
 - **翻訳結果**: `output/iso24765-terminology-ja.jsonl`
 - **進捗記録**: `progress/translation-progress.txt`
 
+##### 2.3.6 ファイル追記の注意事項
+
+**重要**: JSONLファイルに追記する際は、以下の点に注意すること：
+
+1. **適切な追記方法**:
+   - 各行をJSONLファイルの末尾に改行で区切って追記
+   - 一時ファイルを作成し、完成後に適切な形式で書き込む
+   - Bashのcat >> またはechoコマンドを使用する場合は、EOF < /dev/null のようなマーカーが含まれないよう注意
+
+2. **避けるべき方法**:
+   - HeredocでEOFマーカーを使用する場合、`EOF < /dev/null`のような不要な文字列が混入しないよう注意
+   - 例: `cat >> file.jsonl << 'EOF'` を使用する場合は、EOFマーカーが適切に処理されることを確認
+
+3. **推奨される追記方法**:
+
+   ```bash
+   # 推奨方法1: printf を使用
+   printf '%s\n' "$json_line" >> output/iso24765-terminology-ja.jsonl
+
+   # 推奨方法2: echo を使用
+   echo "$json_line" >> output/iso24765-terminology-ja.jsonl
+   ```
+
 ##### 2.3.5 データ構造
 
 翻訳後のJSONL形式：
