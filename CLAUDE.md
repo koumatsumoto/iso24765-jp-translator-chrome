@@ -13,6 +13,7 @@ This is a TypeScript/Node.js project that automatically translates English termi
 - `npm run build` - Compile TypeScript to JavaScript
 - `npm start` - Run the main application (scripts/main.ts)
 - `npm run convert-to-jsonl` - Convert input/iso24765-terminology.json to output/iso24765-terminology.jsonl
+- `npm run validate-jsonl` - Validate output/iso24765-terminology.jsonl against input JSON
 
 ### Code Quality
 

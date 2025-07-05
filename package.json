@@ -11,7 +11,8 @@
     "build": "tsc",
     "fmt": "prettier -w .",
     "start": "node scripts/main.ts",
-    "convert-to-jsonl": "node scripts/convert-to-jsonl.ts"
+    "convert-to-jsonl": "node scripts/convert-to-jsonl.ts",
+    "validate-jsonl": "node scripts/validate-jsonl.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
