@@ -56,3 +56,16 @@ The project is currently in early development phase with minimal implementation.
 Refer to `docs/design.md` for detailed architecture and implementation plan for the ISO 24765 terminology translation system. The system processes 4,634 English terms by converting JSON to JSONL format for efficient streaming processing.
 
 Refer to `docs/implementation-plan.md` for detailed work plan, timeline, and technical considerations for the 6-day implementation schedule.
+
+## Translation Processing Guidelines
+
+### Phase 2: Translation Processing (Manual Claude Execution)
+
+When executing Phase 2 translation processing, follow the specific procedures outlined in `docs/implementation-plan.md` section 2.3:
+
+- **Line-by-line processing**: Read `output/iso24765-terminology.jsonl` one line at a time
+- **Output files**:
+  - Translated results: `output/iso24765-terminology-ja.jsonl`
+  - Progress tracking: `progress/translation-progress.txt`
+- **Translation rules**: Maintain system/software engineering terminology context with formal academic Japanese translation style
+- **Resume capability**: Track progress to allow resuming from interruption point
