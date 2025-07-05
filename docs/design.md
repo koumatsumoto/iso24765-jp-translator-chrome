@@ -20,6 +20,7 @@ ISO/IEC/IEEE 24765 (Systems and software engineering vocabulary) の英語用語
 {
   "number": "3.1",
   "name": "用語名",
+  "alias": ["別名1", "別名2"],
   "definitions": [
     {
       "text": "定義文",
@@ -27,6 +28,7 @@ ISO/IEC/IEEE 24765 (Systems and software engineering vocabulary) の英語用語
     }
   ],
   "confer": ["関連用語1", "関連用語2"],
+  "example": "使用例（オプション）",
   "note": "注記（オプション）"
 }
 ```
@@ -60,9 +62,11 @@ JSON配列を1行1エントリのJSON Lines形式に変換
 #### 翻訳対象フィールド
 
 - `name`: 用語名
+- `alias`: 別名（存在する場合）
 - `definitions[].text`: 定義文
+- `confer`: 関連用語（存在する場合）
+- `example`: 使用例（存在する場合）
 - `note`: 注記（存在する場合）
-- `confer`: 関連用語（用語名のみ）
 
 ### 3. 品質管理
 
