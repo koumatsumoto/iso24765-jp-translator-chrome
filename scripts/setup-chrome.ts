@@ -135,7 +135,7 @@ class ChromeSetup {
 
       // Test Translator API availability
       const isAvailable = await page.evaluate(() => {
-        return "translation" in window && "createTranslator" in (window as any).translation;
+        return "Translator" in window && typeof (window as any).Translator?.create === "function";
       });
 
       await browser.close();
@@ -143,7 +143,7 @@ class ChromeSetup {
       if (isAvailable) {
         return { available: true };
       } else {
-        return { available: false, error: "Translator API not found in window.translation" };
+        return { available: false, error: "Translator API not found - window.Translator.create() is not available" };
       }
     } catch (error) {
       return {

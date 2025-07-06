@@ -29,7 +29,7 @@ export class ChromeTranslator {
     try {
       // Check if Translator API is available
       const isAvailable = await this.page.evaluate(() => {
-        return "translation" in window && "createTranslator" in (window as any).translation;
+        return "Translator" in window && typeof (window as any).Translator?.create === "function";
       });
 
       if (!isAvailable) {
@@ -39,7 +39,7 @@ export class ChromeTranslator {
       // Create translator instance
       this.translatorInstance = await this.page.evaluate(
         async ({ sourceLanguage, targetLanguage }) => {
-          const translator = await (window as any).translation.createTranslator({
+          const translator = await (window as any).Translator.create({
             sourceLanguage,
             targetLanguage,
           });
@@ -64,7 +64,7 @@ export class ChromeTranslator {
   async isReady(): Promise<boolean> {
     try {
       const ready = await this.page.evaluate(() => {
-        return "translation" in window && (window as any).translation.canTranslate;
+        return "Translator" in window && typeof (window as any).Translator?.create === "function";
       });
       return ready;
     } catch (error) {
@@ -104,11 +104,11 @@ export class ChromeTranslator {
       // Perform translation with error handling
       const translatedText = await this.page.evaluate(async (text) => {
         try {
-          if (!(window as any).translation || !(window as any).translation.createTranslator) {
+          if (!(window as any).Translator || typeof (window as any).Translator.create !== "function") {
             throw new Error("Translator API not available");
           }
 
-          const translator = await (window as any).translation.createTranslator({
+          const translator = await (window as any).Translator.create({
             sourceLanguage: "en",
             targetLanguage: "ja",
           });

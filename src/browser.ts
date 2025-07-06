@@ -134,12 +134,12 @@ export class BrowserManager {
 
     try {
       const result = await this.page.evaluate(() => {
-        const hasTranslation = "translation" in window;
-        const hasCreateTranslator = hasTranslation && "createTranslator" in (window as any).translation;
+        const hasTranslator = "Translator" in window;
+        const hasCreateMethod = hasTranslator && typeof (window as any).Translator?.create === "function";
 
         return {
-          hasTranslation,
-          hasCreateTranslator,
+          hasTranslator,
+          hasCreateMethod,
           windowProps: Object.keys(window).filter((key) => key.includes("translat")),
           userAgent: navigator.userAgent,
           availableFeatures: Object.keys(window).filter((key) => key.includes("API") || key.includes("api")),
@@ -170,7 +170,7 @@ export class BrowserManager {
 
       console.log("Language support check:", languageCheck);
 
-      return result.hasTranslation && result.hasCreateTranslator;
+      return result.hasTranslator && result.hasCreateMethod;
     } catch (error) {
       console.error("Error checking Translator API availability:", error);
       return false;
