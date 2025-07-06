@@ -25,29 +25,12 @@ export class BrowserManager {
   }
 
   /**
-   * Find Chrome executable path
+   * Get Chrome channel configuration
    */
-  private async findChromeExecutable(): Promise<string | null> {
-    const chromePaths = [
-      "/usr/bin/google-chrome",
-      "/usr/bin/google-chrome-stable",
-      "/opt/google/chrome/google-chrome",
-      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", // macOS
-      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", // Windows
-      "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe", // Windows 32-bit
-    ];
-
-    for (const path of chromePaths) {
-      try {
-        const { promises: fs } = await import("fs");
-        await fs.access(path);
-        return path;
-      } catch {
-        // File doesn't exist, try next path
-      }
-    }
-
-    return null;
+  private getChromeChannel(): string {
+    // Use 'chrome' for Google Chrome or 'msedge' for Microsoft Edge
+    // These channels are managed by Playwright
+    return "chrome";
   }
 
   /**
@@ -55,18 +38,13 @@ export class BrowserManager {
    */
   async initialize(): Promise<void> {
     try {
-      // Find Chrome executable
-      const chromeExecutable = await this.findChromeExecutable();
+      const chromeChannel = this.getChromeChannel();
+      console.log(`Using Chrome channel: ${chromeChannel}`);
 
-      if (chromeExecutable) {
-        console.log(`Using Chrome executable: ${chromeExecutable}`);
-      } else {
-        console.log("Chrome executable not found, using Playwright's Chromium");
-      }
-
-      // Launch Chrome browser (use system Chrome if found, otherwise Playwright's Chromium)
+      // Launch Chrome browser using Playwright's channel configuration
       const launchOptions = {
         headless: this.config.headless,
+        channel: chromeChannel,
         args: [
           "--enable-experimental-web-platform-features",
           "--enable-features=TranslationAPI",
@@ -83,7 +61,6 @@ export class BrowserManager {
           "--ignore-certificate-errors",
           "--allow-running-insecure-content",
         ],
-        ...(chromeExecutable && { executablePath: chromeExecutable }),
       };
 
       this.browser = await chromium.launch(launchOptions);

@@ -115,14 +115,10 @@ class ChromeSetup {
     try {
       const { chromium } = await import("playwright");
 
-      // Try to find Chrome executable
-      const chromeCheck = await this.checkChromeInstallation();
-      const chromeExecutable = chromeCheck.installed ? chromeCheck.path : null;
-
       const launchOptions = {
         headless: false, // Need to be visible for Translator API
+        channel: "chrome", // Use Playwright-managed Chrome
         args: ["--enable-experimental-web-platform-features", "--enable-features=TranslationAPI", "--disable-web-security", "--no-sandbox"],
-        ...(chromeExecutable && { executablePath: chromeExecutable }),
       };
 
       const browser = await chromium.launch(launchOptions);
@@ -195,18 +191,18 @@ class ChromeSetup {
       console.log("   Download from: https://www.google.com/chrome/");
     }
 
-    // Check Playwright Chromium
-    console.log("\n🎭 Playwright Chromium Check:");
+    // Check Playwright Chrome
+    console.log("\n🎭 Playwright Chrome Check:");
     const playwrightCheck = await this.checkPlaywrightChromium();
 
     if (playwrightCheck.available) {
-      console.log("✅ Playwright Chromium available");
+      console.log("✅ Playwright Chrome available");
       if (playwrightCheck.version) {
         console.log(`   Version: ${playwrightCheck.version}`);
       }
     } else {
-      console.log("❌ Playwright Chromium not available");
-      console.log("   Run: npm install && npx playwright install chromium");
+      console.log("❌ Playwright Chrome not available");
+      console.log("   Run: npm install && npx playwright install chrome");
     }
 
     // Test Translator API
@@ -276,7 +272,7 @@ class ChromeSetup {
       { name: "Node.js version", passed: majorNodeVersion >= 24 },
       { name: "Chrome installation", passed: chromeCheck.installed },
       { name: "Chrome version", passed: chromeCheck.version ? this.checkTranslatorAPISupport(chromeCheck.version) : false },
-      { name: "Playwright Chromium", passed: playwrightCheck.available },
+      { name: "Playwright Chrome", passed: playwrightCheck.available },
       { name: "Translator API", passed: apiTest.available },
     ];
 
@@ -299,7 +295,7 @@ class ChromeSetup {
 
       if (!playwrightCheck.available) {
         console.log("\n🔗 Playwright Setup:");
-        console.log("   npm install && npx playwright install chromium");
+        console.log("   npm install && npx playwright install chrome");
       }
     }
   }
@@ -316,8 +312,8 @@ class ChromeSetup {
       console.log("✅ npm packages installed\n");
 
       console.log("Installing Playwright browsers...");
-      execSync("npx playwright install chromium", { stdio: "inherit" });
-      console.log("✅ Playwright Chromium installed\n");
+      execSync("npx playwright install chrome", { stdio: "inherit" });
+      console.log("✅ Playwright Chrome installed\n");
 
       console.log("🎉 All dependencies installed successfully!");
     } catch (error) {
