@@ -49,7 +49,15 @@ export class TranslationProcessor {
       // Check if Translator API is available
       const isAPIAvailable = await this.browserManager.isTranslatorAPIAvailable();
       if (!isAPIAvailable) {
-        throw new Error("Chrome Translator API is not available. Please ensure you are using Chrome 138 or later.");
+        throw new Error(`Chrome Translator API is not available. 
+        
+This API is an experimental feature that requires:
+1. Google Chrome 131+ (currently using: ${chromeVersion})
+2. Participation in Chrome's Early Preview Program
+3. Language packs installed via chrome://on-device-translation-internals/
+
+Current system is using ${chromeVersion.includes("138") ? "Playwright Chromium" : "Chrome"}.
+Please install Google Chrome 131+ and enable the experimental Translation API feature.`);
       }
 
       // Initialize translator

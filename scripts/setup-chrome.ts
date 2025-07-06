@@ -115,10 +115,17 @@ class ChromeSetup {
     try {
       const { chromium } = await import("playwright");
 
-      const browser = await chromium.launch({
+      // Try to find Chrome executable
+      const chromeCheck = await this.checkChromeInstallation();
+      const chromeExecutable = chromeCheck.installed ? chromeCheck.path : null;
+
+      const launchOptions = {
         headless: false, // Need to be visible for Translator API
         args: ["--enable-experimental-web-platform-features", "--enable-features=TranslationAPI", "--disable-web-security", "--no-sandbox"],
-      });
+        ...(chromeExecutable && { executablePath: chromeExecutable }),
+      };
+
+      const browser = await chromium.launch(launchOptions);
 
       const context = await browser.newContext();
       const page = await context.newPage();
