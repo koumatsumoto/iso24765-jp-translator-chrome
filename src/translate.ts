@@ -37,6 +37,36 @@ export async function translateWordsBatch(page: Page, words: Word[]): Promise<Tr
           });
         }
 
+        // Translate confer field if present
+        if (word.confer && word.confer.length > 0) {
+          translated.confer = word.confer;
+          translated.confer_ja = [];
+          for (const conferItem of word.confer) {
+            translated.confer_ja.push(await translator.translate(conferItem));
+          }
+        }
+
+        // Translate example field if present
+        if (word.example) {
+          translated.example = word.example;
+          translated.example_ja = await translator.translate(word.example);
+        }
+
+        // Translate note field if present
+        if (word.note) {
+          translated.note = word.note;
+          translated.note_ja = await translator.translate(word.note);
+        }
+
+        // Translate alias field if present
+        if (word.alias && word.alias.length > 0) {
+          translated.alias = word.alias;
+          translated.alias_ja = [];
+          for (const aliasItem of word.alias) {
+            translated.alias_ja.push(await translator.translate(aliasItem));
+          }
+        }
+
         results.push(translated);
 
         // Progress logging every 10 items or on completion
@@ -45,7 +75,7 @@ export async function translateWordsBatch(page: Page, words: Word[]): Promise<Tr
         }
       } catch (error) {
         console.error(`Failed: ${word.name}`, error);
-        results.push({
+        const failedTranslation: any = {
           number: word.number,
           name: word.name,
           name_ja: word.name,
@@ -54,7 +84,27 @@ export async function translateWordsBatch(page: Page, words: Word[]): Promise<Tr
             text_ja: def.text,
             reference: def.reference,
           })),
-        });
+        };
+
+        // Copy untranslated fields
+        if (word.confer) {
+          failedTranslation.confer = word.confer;
+          failedTranslation.confer_ja = word.confer;
+        }
+        if (word.example) {
+          failedTranslation.example = word.example;
+          failedTranslation.example_ja = word.example;
+        }
+        if (word.note) {
+          failedTranslation.note = word.note;
+          failedTranslation.note_ja = word.note;
+        }
+        if (word.alias) {
+          failedTranslation.alias = word.alias;
+          failedTranslation.alias_ja = word.alias;
+        }
+
+        results.push(failedTranslation);
       }
     }
 
