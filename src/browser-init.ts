@@ -6,7 +6,7 @@ import type { BrowserContext, Page } from "playwright";
  */
 export async function initializeBrowser(): Promise<{ context: BrowserContext; page: Page }> {
   const context = await chromium.launchPersistentContext("/tmp/chrome-translator-profile", {
-    headless: false,
+    headless: true,
     channel: "chrome",
     viewport: { width: 1280, height: 720 },
     args: [

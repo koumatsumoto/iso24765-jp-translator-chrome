@@ -2,53 +2,64 @@ import type { Page } from "playwright";
 import type { Word, TranslatedWord } from "./types.ts";
 
 export async function translateWordsBatch(page: Page, words: Word[]): Promise<TranslatedWord[]> {
-  const result = await page.evaluate(async (wordsData) => {
-    const translator = await (window as any).Translator.create({
+  console.log(`Starting batch translation of ${words.length} terms...`);
+
+  const results: TranslatedWord[] = [];
+
+  await page.evaluate(async () => {
+    (window as any).translator = await (window as any).Translator.create({
       sourceLanguage: "en",
       targetLanguage: "ja",
     });
+  });
 
-    const results: any[] = [];
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    if (!word) continue;
 
-    for (let i = 0; i < wordsData.length; i++) {
-      const word = wordsData[i];
-      if (!word) continue;
+    try {
+      const translated = await page.evaluate(async (wordData) => {
+        const translator = (window as any).translator;
 
-      try {
-        const translated: any = {
-          number: word.number,
-          name: word.name,
-          name_ja: await translator.translate(word.name),
+        const result: any = {
+          number: wordData.number,
+          name: wordData.name,
+          name_ja: await translator.translate(wordData.name),
           definitions: [],
         };
 
-        for (const def of word.definitions) {
-          translated.definitions.push({
+        for (const def of wordData.definitions) {
+          result.definitions.push({
             text: def.text,
             text_ja: await translator.translate(def.text),
             reference: def.reference,
           });
         }
 
-        results.push(translated);
-        console.log(`${i + 1}/${wordsData.length}: ${word.name}`);
-      } catch (error) {
-        console.error(`Failed: ${word.name}`, error);
-        results.push({
-          number: word.number,
-          name: word.name,
-          name_ja: word.name,
-          definitions: word.definitions.map((def: any) => ({
-            text: def.text,
-            text_ja: def.text,
-            reference: def.reference,
-          })),
-        });
+        return result;
+      }, word);
+
+      results.push(translated);
+
+      // Progress logging every 10 items or on completion
+      if ((i + 1) % 10 === 0 || i === words.length - 1) {
+        console.log(`Progress: ${i + 1}/${words.length} (${Math.round(((i + 1) / words.length) * 100)}%)`);
       }
+    } catch (error) {
+      console.error(`Failed: ${word.name}`, error);
+      results.push({
+        number: word.number,
+        name: word.name,
+        name_ja: word.name,
+        definitions: word.definitions.map((def) => ({
+          text: def.text,
+          text_ja: def.text,
+          reference: def.reference,
+        })),
+      });
     }
+  }
 
-    return results;
-  }, words);
-
-  return result;
+  console.log(`Batch translation completed. Processed ${results.length} terms.`);
+  return results;
 }
