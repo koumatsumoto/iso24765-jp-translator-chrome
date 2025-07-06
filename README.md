@@ -1,3 +1,3 @@
-# iso24765-jp-translator
+# iso24765-jp-translator-chrome
 
-ISO/IEC/IEEE 24765（Systems and software engineering vocabulary）の英語用語リストをAI Agentが自動で日本語翻訳するプロジェクト。入力された英語用語集を解析し、適切な日本語訳を生成します。翻訳結果はTypeScript/Node.jsベースのバリデーションツールで品質チェックを行い、一貫性のある高品質な日本語用語集を作成します。
+iso24765-jp-translatorをフォークし、Chrome Translation APIを活用してISO24765用語集を日本語翻訳するプロジェクト。ブラウザネイティブの翻訳機能を使用することで、AIエージェントに依存せず高速で安定した翻訳を実現。TypeScript/Node.jsベースのバリデーション機能は継承し、Chrome APIの特性に最適化された用語集作成ツールを提供します。
