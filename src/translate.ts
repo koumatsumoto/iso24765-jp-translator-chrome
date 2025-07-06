@@ -1,32 +1,54 @@
 import type { Page } from "playwright";
+import type { Word, TranslatedWord } from "./types.ts";
 
-/**
- * Translate text using Chrome Translator API
- */
-export async function translateText(page: Page, text: string): Promise<string> {
-  if (!text?.trim()) {
-    return "";
-  }
+export async function translateWordsBatch(page: Page, words: Word[]): Promise<TranslatedWord[]> {
+  const result = await page.evaluate(async (wordsData) => {
+    const translator = await (window as any).Translator.create({
+      sourceLanguage: "en",
+      targetLanguage: "ja",
+    });
 
-  if (text.length > 5000) {
-    throw new Error("Text too long");
-  }
+    const results: any[] = [];
 
-  const result = await Promise.race([
-    page.evaluate(async (inputText) => {
-      const translator = await (window as any).Translator.create({
-        sourceLanguage: "en",
-        targetLanguage: "ja",
-      });
-      return await translator.translate(inputText);
-    }, text),
+    for (let i = 0; i < wordsData.length; i++) {
+      const word = wordsData[i];
+      if (!word) continue;
 
-    new Promise<string>((_, reject) => setTimeout(() => reject(new Error("Translation timeout")), 10000)),
-  ]);
+      try {
+        const translated: any = {
+          number: word.number,
+          name: word.name,
+          name_ja: await translator.translate(word.name),
+          definitions: [],
+        };
 
-  if (!result || typeof result !== "string") {
-    throw new Error("Invalid translation result");
-  }
+        for (const def of word.definitions) {
+          translated.definitions.push({
+            text: def.text,
+            text_ja: await translator.translate(def.text),
+            reference: def.reference,
+          });
+        }
+
+        results.push(translated);
+        console.log(`${i + 1}/${wordsData.length}: ${word.name}`);
+      } catch (error) {
+        console.error(`Failed: ${word.name}`, error);
+        results.push({
+          number: word.number,
+          name: word.name,
+          name_ja: word.name,
+          definitions: word.definitions.map((def: any) => ({
+            text: def.text,
+            text_ja: def.text,
+            reference: def.reference,
+          })),
+        });
+      }
+    }
+
+    return results;
+  }, words);
 
   return result;
 }
