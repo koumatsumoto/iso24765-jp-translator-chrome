@@ -1,116 +1,128 @@
 import type { Page } from "playwright";
 import type { Word, TranslatedWord } from "./types.ts";
 
-export async function translateWordsBatch(page: Page, words: Word[]): Promise<TranslatedWord[]> {
-  console.log(`Starting batch translation of ${words.length} terms...`);
+export async function translateWordsBatch(page: Page, words: Word[], concurrency: number = 10): Promise<TranslatedWord[]> {
+  console.log(`Starting batch translation of ${words.length} terms with concurrency: ${concurrency}...`);
 
   // Connect browser console logs to Node.js terminal
   page.on("console", (msg) => {
     console.log(`Browser: ${msg.text()}`);
   });
 
-  const result = await page.evaluate(async (wordsData) => {
-    const translator = await (window as any).Translator.create({
-      sourceLanguage: "en",
-      targetLanguage: "ja",
-    });
-
-    const results: any[] = [];
-
-    for (let i = 0; i < wordsData.length; i++) {
-      const word = wordsData[i];
-      if (!word) continue;
-
-      try {
-        const translated: any = {
-          number: word.number,
-          name: word.name,
-          name_ja: await translator.translate(word.name),
-          definitions: [],
-        };
-
-        for (const def of word.definitions) {
-          translated.definitions.push({
-            text: def.text,
-            text_ja: await translator.translate(def.text),
-            reference: def.reference,
-          });
-        }
-
-        // Translate confer field if present
-        if (word.confer && word.confer.length > 0) {
-          translated.confer = word.confer;
-          translated.confer_ja = [];
-          for (const conferItem of word.confer) {
-            translated.confer_ja.push(await translator.translate(conferItem));
-          }
-        }
-
-        // Translate example field if present
-        if (word.example) {
-          translated.example = word.example;
-          translated.example_ja = await translator.translate(word.example);
-        }
-
-        // Translate note field if present
-        if (word.note) {
-          translated.note = word.note;
-          translated.note_ja = await translator.translate(word.note);
-        }
-
-        // Translate alias field if present
-        if (word.alias && word.alias.length > 0) {
-          translated.alias = word.alias;
-          translated.alias_ja = [];
-          for (const aliasItem of word.alias) {
-            translated.alias_ja.push(await translator.translate(aliasItem));
-          }
-        }
-
-        results.push(translated);
-
-        // Progress logging every 10 items or on completion
-        if ((i + 1) % 10 === 0 || i === wordsData.length - 1) {
-          console.log(`Progress: ${i + 1}/${wordsData.length} (${Math.round(((i + 1) / wordsData.length) * 100)}%)`);
-        }
-      } catch (error) {
-        console.error(`Failed: ${word.name}`, error);
-        const failedTranslation: any = {
-          number: word.number,
-          name: word.name,
-          name_ja: word.name,
-          definitions: word.definitions.map((def: any) => ({
-            text: def.text,
-            text_ja: def.text,
-            reference: def.reference,
-          })),
-        };
-
-        // Copy untranslated fields
-        if (word.confer) {
-          failedTranslation.confer = word.confer;
-          failedTranslation.confer_ja = word.confer;
-        }
-        if (word.example) {
-          failedTranslation.example = word.example;
-          failedTranslation.example_ja = word.example;
-        }
-        if (word.note) {
-          failedTranslation.note = word.note;
-          failedTranslation.note_ja = word.note;
-        }
-        if (word.alias) {
-          failedTranslation.alias = word.alias;
-          failedTranslation.alias_ja = word.alias;
-        }
-
-        results.push(failedTranslation);
+  const result = await page.evaluate(
+    async ({ wordsData, maxConcurrency }: { wordsData: Word[]; maxConcurrency: number }) => {
+      interface BrowserTranslator {
+        translate(text: string): Promise<string>;
       }
-    }
 
-    console.log(`Batch translation completed. Processed ${results.length} terms.`);
-    return results;
-  }, words);
+      const translator = await (
+        window as unknown as { Translator: { create(config: { sourceLanguage: string; targetLanguage: string }): Promise<BrowserTranslator> } }
+      ).Translator.create({
+        sourceLanguage: "en",
+        targetLanguage: "ja",
+      });
+
+      // Helper function to translate a single word with parallel sub-operations
+      async function translateWord(word: Word): Promise<TranslatedWord> {
+        try {
+          const translationTasks: Promise<string>[] = [];
+
+          // Collect all translation tasks for this word
+          translationTasks.push(translator.translate(word.name));
+
+          // Collect definition translations
+          const definitionTasks = word.definitions.map((def) => translator.translate(def.text));
+          translationTasks.push(...definitionTasks);
+
+          // Collect optional field translations
+          const optionalTasks: Promise<string>[] = [];
+          if (word.confer && word.confer.length > 0) {
+            optionalTasks.push(...word.confer.map((item) => translator.translate(item)));
+          }
+          if (word.example) {
+            optionalTasks.push(translator.translate(word.example));
+          }
+          if (word.note) {
+            optionalTasks.push(translator.translate(word.note));
+          }
+          if (word.alias && word.alias.length > 0) {
+            optionalTasks.push(...word.alias.map((item) => translator.translate(item)));
+          }
+
+          // Execute all translations in parallel
+          const [nameTranslation, ...definitionTranslations] = await Promise.all(translationTasks);
+          const optionalTranslations = optionalTasks.length > 0 ? await Promise.all(optionalTasks) : [];
+
+          // Build result object
+          const translated: TranslatedWord = {
+            number: word.number,
+            name: word.name,
+            name_ja: nameTranslation || word.name,
+            definitions: word.definitions.map((def, index) => ({
+              text: def.text,
+              text_ja: definitionTranslations[index] || def.text,
+              reference: def.reference,
+            })),
+          };
+
+          // Map optional translations back to their fields
+          let optionalIndex = 0;
+          if (word.confer && word.confer.length > 0) {
+            translated.confer = word.confer;
+            translated.confer_ja = word.confer.map(() => optionalTranslations[optionalIndex++]) as [string, ...string[]];
+          }
+          if (word.example) {
+            translated.example = word.example;
+            translated.example_ja = optionalTranslations[optionalIndex++];
+          }
+          if (word.note) {
+            translated.note = word.note;
+            translated.note_ja = optionalTranslations[optionalIndex++];
+          }
+          if (word.alias && word.alias.length > 0) {
+            translated.alias = word.alias;
+            translated.alias_ja = word.alias.map(() => optionalTranslations[optionalIndex++]) as [string, ...string[]];
+          }
+
+          return translated;
+        } catch (error) {
+          console.error(`Failed: ${word.name}`, error);
+          return {
+            number: word.number,
+            name: word.name,
+            name_ja: word.name,
+            definitions: word.definitions.map((def) => ({
+              text: def.text,
+              text_ja: def.text,
+              reference: def.reference,
+            })),
+            ...(word.confer && { confer: word.confer, confer_ja: word.confer }),
+            ...(word.example && { example: word.example, example_ja: word.example }),
+            ...(word.note && { note: word.note, note_ja: word.note }),
+            ...(word.alias && { alias: word.alias, alias_ja: word.alias }),
+          };
+        }
+      }
+
+      // Process words in batches with controlled concurrency
+      const results: TranslatedWord[] = [];
+      const totalWords = wordsData.length;
+
+      for (let i = 0; i < totalWords; i += maxConcurrency) {
+        const batch = wordsData.slice(i, i + maxConcurrency);
+        const batchResults = await Promise.all(batch.map(translateWord));
+        results.push(...batchResults);
+
+        // Progress logging
+        const completed = Math.min(i + maxConcurrency, totalWords);
+        console.log(`Progress: ${completed}/${totalWords} (${Math.round((completed / totalWords) * 100)}%)`);
+      }
+
+      console.log(`Batch translation completed. Processed ${results.length} terms.`);
+      return results;
+    },
+    { wordsData: words, maxConcurrency: concurrency },
+  );
 
   return result;
 }
