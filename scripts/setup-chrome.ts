@@ -115,26 +115,29 @@ class ChromeSetup {
     try {
       const { chromium } = await import("playwright");
 
-      const launchOptions = {
-        headless: false, // Need to be visible for Translator API
-        channel: "chrome", // Use Playwright-managed Chrome
-        args: ["--enable-experimental-web-platform-features", "--enable-features=TranslationAPI", "--disable-web-security", "--no-sandbox"],
-      };
+      const context = await chromium.launchPersistentContext("/tmp/chrome-translator-profile", {
+        headless: true,
+        channel: "chrome",
+        viewport: { width: 1280, height: 720 },
+        args: [
+          "--enable-experimental-web-platform-features",
+          "--enable-features=TranslationAPI",
+          "--enable-blink-features=TranslationAPI",
+          "--disable-web-security",
+          "--no-sandbox",
+        ],
+      });
 
-      const browser = await chromium.launch(launchOptions);
-
-      const context = await browser.newContext();
       const page = await context.newPage();
-
-      // Navigate to a blank page
-      await page.goto("about:blank");
+      await page.goto("https://www.google.com");
+      await page.waitForTimeout(2000);
 
       // Test Translator API availability
       const isAvailable = await page.evaluate(() => {
         return "Translator" in window && typeof (window as any).Translator?.create === "function";
       });
 
-      await browser.close();
+      await context.close();
 
       if (isAvailable) {
         return { available: true };
