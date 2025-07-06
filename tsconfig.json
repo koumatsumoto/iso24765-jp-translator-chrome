@@ -31,6 +31,6 @@
     "skipLibCheck": false,
     "allowImportingTsExtensions": true
   },
-  "include": ["scripts/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

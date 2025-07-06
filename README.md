@@ -1,3 +1,3 @@
 # iso24765-jp-translator-chrome
 
-iso24765-jp-translatorをフォークし、Chrome Translation APIを活用してISO24765用語集を日本語翻訳するプロジェクト。ブラウザネイティブの翻訳機能を使用することで、AIエージェントに依存せず高速で安定した翻訳を実現。TypeScript/Node.jsベースのバリデーション機能は継承し、Chrome APIの特性に最適化された用語集作成ツールを提供します。
+iso24765-jp-translatorをフォークし、Chrome Translator APIを活用してISO24765用語集を日本語翻訳するプロジェクト。ブラウザネイティブの翻訳機能を使用することで、AIエージェントに依存せず高速で安定した翻訳を実現。TypeScript/Node.jsベースのバリデーション機能は継承し、Chrome APIの特性に最適化された用語集作成ツールを提供します。
